@@ -1,85 +1,94 @@
 'use client';
 import React from 'react';
 
-const Question = ({ question, value, onChange }) => {
+const Question = ({ question, value, onChange, hasError }) => {
   const { id, question: text, type, options, placeholder, prefix, suffix, maxLength, max } = question;
+
+  // Display error as a warning if hasError is true
+  const renderWarning = () =>
+    hasError ? (
+      <div className="text-yellow-600 bg-yellow-100 border-l-4 border-yellow-500 p-2 mb-2 rounded">
+        {typeof hasError === 'string' ? hasError : 'Por favor completa este campo correctamente.'}
+      </div>
+    ) : null;
 
   if (type === 'multi-choice') {
     return (
       <div>
-      <p className="text-lg font-semibold text-slate-800 mb-2">{text}</p>
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt, idx) => {
-        const isOther = opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other';
-        const checked = value?.some(v => (isOther ? typeof v === 'string' && v.startsWith('Otros:') : v === opt));
-        const otherValue = isOther
-          ? (value?.find(v => typeof v === 'string' && v.startsWith('Otros:')) || '').replace(/^Otros:\s*/, '')
-          : '';
+        <p className="text-lg font-semibold text-slate-800 mb-2">{text}</p>
+        <div className="flex flex-wrap gap-2">
+          {options.map((opt, idx) => {
+            const isOther = opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other';
+            const checked = value?.some(v => (isOther ? typeof v === 'string' && v.startsWith('Otros:') : v === opt));
+            const otherValue = isOther
+              ? (value?.find(v => typeof v === 'string' && v.startsWith('Otros:')) || '').replace(/^Otros:\s*/, '')
+              : '';
 
-        return (
-          <label
-          key={idx}
-          className={`flex items-center px-4 py-2 rounded-full cursor-pointer border
-            ${checked ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-700 border-gray-300 hover:bg-blue-50'}
-          `}
-          style={{ userSelect: 'none' }}
-          >
-          <input
-            type="checkbox"
-            value={opt}
-            checked={checked}
-            onChange={(e) => {
-            let newValues = value ? [...value] : [];
-            if (e.target.checked) {
-              if (isOther) {
-              // Add placeholder for Otros if not present
-              if (!newValues.some(v => typeof v === 'string' && v.startsWith('Otros:'))) {
-                newValues.push('Otros: ');
-              }
-              } else {
-              newValues.push(opt);
-              }
-            } else {
-              if (isOther) {
-              newValues = newValues.filter(v => !(typeof v === 'string' && v.startsWith('Otros:')));
-              } else {
-              newValues = newValues.filter(v => v !== opt);
-              }
-            }
-            onChange(id, newValues);
-            }}
-            className="w-6 h-6 accent-blue-500 mr-2"
-            style={{ minWidth: 24, minHeight: 24 }}
-          />
-          <span>{opt}</span>
-          {isOther && checked && (
-            <input
-            type="text"
-            className="ml-2 p-1 rounded border border-gray-300 w-full max-w-xs text-sm white"
-            placeholder="Especifica..."
-            value={otherValue}
-            required
-            onChange={e => {
-              const newOther = `Otros: ${e.target.value}`;
-              let newValues = value ? [...value] : [];
-              const idx = newValues.findIndex(v => typeof v === 'string' && v.startsWith('Otros:'));
-              if (idx !== -1) {
-              newValues[idx] = newOther;
-              } else {
-              newValues.push(newOther);
-              }
-              onChange(id, newValues);
-            }}
-            />
-          )}
-          </label>
-        );
-        })}
-      </div>
-      {/* Validation message for Otros */}
-      {options.some(opt => (opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other')) && value?.some(v => typeof v === 'string' && v.startsWith('Otros:')) && !value.find(v => typeof v === 'string' && v.match(/^Otros:\s*\S+/)) && (
-        <div className="text-red-500 text-sm mt-1">Por favor especifica el campo "Otros".</div>
-      )}
+            return (
+              <label
+                key={idx}
+                className={`flex items-center px-4 py-2 rounded-full cursor-pointer border
+                  ${checked ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-700 border-gray-300 hover:bg-blue-50'}
+                `}
+                style={{ userSelect: 'none' }}
+              >
+                <input
+                  type="checkbox"
+                  value={opt}
+                  checked={checked}
+                  onChange={(e) => {
+                    let newValues = value ? [...value] : [];
+                    if (e.target.checked) {
+                      if (isOther) {
+                        // Add placeholder for Otros if not present
+                        if (!newValues.some(v => typeof v === 'string' && v.startsWith('Otros:'))) {
+                          newValues.push('Otros: ');
+                        }
+                      } else {
+                        newValues.push(opt);
+                      }
+                    } else {
+                      if (isOther) {
+                        newValues = newValues.filter(v => !(typeof v === 'string' && v.startsWith('Otros:')));
+                      } else {
+                        newValues = newValues.filter(v => v !== opt);
+                      }
+                    }
+                    onChange(id, newValues);
+                  }}
+                  className="w-6 h-6 accent-blue-500 mr-2"
+                  style={{ minWidth: 24, minHeight: 24 }}
+                />
+                <span>{opt}</span>
+                {isOther && checked && (
+                  <input
+                    type="text"
+                    className="ml-2 p-1 rounded border border-gray-300 w-full max-w-xs text-sm white"
+                    placeholder="Especifica..."
+                    value={otherValue}
+                    required
+                    onChange={e => {
+                      const newOther = `Otros: ${e.target.value}`;
+                      let newValues = value ? [...value] : [];
+                      const idx = newValues.findIndex(v => typeof v === 'string' && v.startsWith('Otros:'));
+                      if (idx !== -1) {
+                        newValues[idx] = newOther;
+                      } else {
+                        newValues.push(newOther);
+                      }
+                      onChange(id, newValues);
+                    }}
+                  />
+                )}
+              </label>
+            );
+          })}
+          {renderWarning()}
+        </div>
+        {/* Validation message for Otros */}
+        {options.some(opt => (opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other')) && value?.some(v => typeof v === 'string' && v.startsWith('Otros:')) && !value.find(v => typeof v === 'string' && v.match(/^Otros:\s*\S+/)) && (
+          <div className="text-red-500 text-sm mt-1">Por favor especifica el campo "Otros".</div>
+        )}
       </div>
     );
   }
@@ -94,7 +103,6 @@ const Question = ({ question, value, onChange }) => {
           id={`question-${id}`}
           value={value}
           onChange={(e) => onChange(id, e.target.value)}
-
           className="w-full p-2 border border-gray-300 rounded"
         >
           <option value="">Selecciona una opción</option>
@@ -104,6 +112,7 @@ const Question = ({ question, value, onChange }) => {
             </option>
           ))}
         </select>
+        {renderWarning()}
       </div>
     );
   }
@@ -120,9 +129,9 @@ const Question = ({ question, value, onChange }) => {
           maxLength={maxLength}
           value={value}
           onChange={(e) => onChange(id, e.target.value)}
-
           className="w-full p-2 border border-gray-300 rounded"
         />
+        {renderWarning()}
       </div>
     );
   }
@@ -132,20 +141,20 @@ const Question = ({ question, value, onChange }) => {
         <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
           {text}
         </label>
-      <div className="flex items-center">
-        {prefix && <span className="text-gray-600 mr-2">{prefix}</span>}
-        <input
-          type="number"
-          id={`question-${id}`}
-          value={value}
-          min={0}
-          max={max}
-          onChange={(e) => onChange(id, e.target.value)}
-
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-        {suffix && <span className="text-gray-600 ml-2">{suffix}</span>}
+        <div className="flex items-center">
+          {prefix && <span className="text-gray-600 mr-2">{prefix}</span>}
+          <input
+            type="number"
+            id={`question-${id}`}
+            value={value}
+            min={0}
+            max={max}
+            onChange={(e) => onChange(id, e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          {suffix && <span className="text-gray-600 ml-2">{suffix}</span>}
         </div>
+        {renderWarning()}
       </div>
     );
   }
@@ -212,7 +221,7 @@ const Question = ({ question, value, onChange }) => {
         <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
           {text}
         </label>
-        <ol className="list-decimal pl-5">
+        <ul>
           {orderedOptions.map((option, index) => (
             <li
               key={option}
@@ -248,7 +257,8 @@ const Question = ({ question, value, onChange }) => {
               </span>
             </li>
           ))}
-        </ol>
+        </ul>
+        {renderWarning()}
       </div>
     );
   }
@@ -260,36 +270,37 @@ const Question = ({ question, value, onChange }) => {
 
     return (
       <div className="mb-4">
-      <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-        {text}
-      </label>
-      <div className="flex flex-wrap space-x-2">
-        {options.map((option, index) => (
-        <div key={index} className="flex-1">
-          <label className="block text-gray-600 mb-1">{option}</label>
-          <input
-          type="number"
-          min={0}
-          max={100}
-          placeholder={0}
-          value={value?.[option] || ''}
-          onChange={(e) => {
-            const inputVal = parseInt(e.target.value) || 0;
-            const newValue = { ...value, [option]: inputVal };
-            const newTotal = options.reduce((sum, opt) => sum + (opt === option ? inputVal : (parseInt(value?.[opt]) || 0)), 0);
-            if (newTotal <= 100) {
-            onChange(id, newValue);
-            }
-          }}
-          className="w-full p-2 border border-gray-300 rounded"
-          />
+        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
+          {text}
+        </label>
+        <div className="flex flex-wrap space-x-2">
+          {options.map((option, index) => (
+            <div key={index} className="flex-1">
+              <label className="block text-gray-600 mb-1">{option}</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                placeholder={0}
+                value={value?.[option] || ''}
+                onChange={(e) => {
+                  const inputVal = parseInt(e.target.value) || 0;
+                  const newValue = { ...value, [option]: inputVal };
+                  const newTotal = options.reduce((sum, opt) => sum + (opt === option ? inputVal : (parseInt(value?.[opt]) || 0)), 0);
+                  if (newTotal <= 100) {
+                    onChange(id, newValue);
+                  }
+                }}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+          ))}
         </div>
-        ))}
-      </div>
-      <div className="mt-2 text-sm">
-        Suma total: <span className={isComplete ? "text-green-600" : "text-red-600"}>{total}</span> / 100
-        {!isComplete && <span className="ml-2 text-red-500">La suma debe ser exactamente 100%</span>}
-      </div>
+        <div className="mt-2 text-sm">
+          Suma total: <span className={isComplete ? "text-green-600" : "text-red-600"}>{total}</span> / 100
+          {!isComplete && <span className="ml-2 text-red-500">La suma debe ser exactamente 100%</span>}
+        </div>
+        {renderWarning()}
       </div>
     );
   }

@@ -5,26 +5,46 @@ import Question from "./Question";
 
 const SurveyForm = () => {
   const [answers, setAnswers] = useState({});
+  const [errorQuestionId, setErrorQuestionId] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Loader state
 
   const handleChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    if (errorQuestionId === id) setErrorQuestionId(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Respuestas enviadas:", answers);
-    /* const res = await fetch("/api/submit-survey", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(answers),
-    });
-    if (res.ok) {
-      alert("Gracias por tu respuesta!");
-    } else {
-      alert("Error al enviar la encuesta. Inténtalo de nuevo.");
-    } */
+    setErrorQuestionId(null);
+    setLoading(true); // Start loader
+    try {
+      const res = await fetch("/api/submit-survey", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(answers),
+      });
+      if (res.ok) {
+        alert("Gracias por tu respuesta!");
+        setAnswers({});
+        setError(null);
+        setErrorQuestionId(null);
+      } else if (res.status === 400) {
+        const errorData = await res.json();
+        setErrorQuestionId(errorData.question_id);
+        setError(errorData.error || "Respuesta inválida para una o más preguntas.");
+      } else {
+        const errorData = await res.json();
+        if (errorData.question_id) {
+          setErrorQuestionId(errorData.question_id);
+        }
+        setError(errorData.error || "Ocurrió un error al enviar las respuestas.");
+      }
+    } finally {
+      setLoading(false); // Stop loader
+    }
   };
 
   return (
@@ -43,6 +63,7 @@ const SurveyForm = () => {
               question={q}
               value={answers[q.id]}
               onChange={handleChange}
+              hasError={errorQuestionId === q.id}
             />
           ))}
         </div>
@@ -51,13 +72,24 @@ const SurveyForm = () => {
         <button
           type="submit"
           className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-full transition duration-200"
+          disabled={loading}
         >
-          Enviar respuestas
+          {loading ? "Enviando..." : "Enviar respuestas"}
         </button>
       </div>
+      {loading && (
+        <div className="flex justify-center mt-4">
+          <span className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></span>
+          <span className="ml-2 text-blue-600">Enviando respuestas...</span>
+        </div>
+      )}
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded">
+          {error}
+        </div>
+      )}
     </form>
   );
 };
 
 export default SurveyForm;
-// This code defines a SurveyForm component that renders a survey form based on predefined questions.
