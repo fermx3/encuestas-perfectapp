@@ -7,7 +7,7 @@ export async function POST(req) {
 
     // Basic validation
 
-    /* if (
+    if (
       !submittedAnswers ||
       typeof submittedAnswers !== "object" ||
       Array.isArray(submittedAnswers)
@@ -107,18 +107,7 @@ export async function POST(req) {
     return new Response(
       JSON.stringify({ success: true, message: "Encuesta enviada con éxito", id: saved.id }),
       { status: 200 }
-    ); */
-
-    const saved = await prisma.response.create({
-      data: { answers: submittedAnswers },
-    });
-    console.log("Encuesta guardada con éxito:", saved);
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Encuesta enviada con éxito", id: saved.id }),
-      { status: 200 }
     );
-
   } catch (err) {
     console.error("Error al guardar la encuesta:", err);
     return new Response(
