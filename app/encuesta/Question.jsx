@@ -226,7 +226,7 @@ const Question = ({ question, value, onChange }) => {
       <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
         {text}
       </label>
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap space-x-2">
         {options.map((option, index) => (
         <div key={index} className="flex-1">
           <label className="block text-gray-600 mb-1">{option}</label>
