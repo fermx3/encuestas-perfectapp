@@ -157,7 +157,7 @@ const Question = ({ question, value, onChange }) => {
     // Update parent when order changes
     React.useEffect(() => {
       if (JSON.stringify(orderedOptions) !== JSON.stringify(value)) {
-      onChange(id, orderedOptions);
+        onChange(id, orderedOptions);
       }
       // eslint-disable-next-line
     }, [orderedOptions]);
@@ -183,6 +183,21 @@ const Question = ({ question, value, onChange }) => {
       dragOverItem.current = null;
     };
 
+    // Arrow handlers for mobile
+    const moveUp = (index) => {
+      if (index === 0) return;
+      const newList = [...orderedOptions];
+      [newList[index - 1], newList[index]] = [newList[index], newList[index - 1]];
+      setOrderedOptions(newList);
+    };
+
+    const moveDown = (index) => {
+      if (index === orderedOptions.length - 1) return;
+      const newList = [...orderedOptions];
+      [newList[index], newList[index + 1]] = [newList[index + 1], newList[index]];
+      setOrderedOptions(newList);
+    };
+
     const green_gradient_colors = [
       'from-green-500 to-green-600',
       'from-green-400 to-green-500',
@@ -194,24 +209,46 @@ const Question = ({ question, value, onChange }) => {
 
     return (
       <div className="mb-4">
-      <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-        {text}
-      </label>
-      <ol className="list-decimal pl-5">
-        {orderedOptions.map((option, index) => (
-        <li
-          key={option}
-          className={`bg-gradient-to-r ${green_gradient_colors[index]} p-2 rounded mb-2 cursor-move`}
-          draggable
-          onDragStart={() => handleDragStart(index)}
-          onDragEnter={() => handleDragEnter(index)}
-          onDragEnd={handleDragEnd}
-          onDragOver={e => e.preventDefault()}
-        >
-          {option}
-        </li>
-        ))}
-      </ol>
+        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
+          {text}
+        </label>
+        <ol className="list-decimal pl-5">
+          {orderedOptions.map((option, index) => (
+            <li
+              key={option}
+              className={`bg-gradient-to-r ${green_gradient_colors[index]} p-2 rounded mb-2 flex items-center justify-between cursor-move`}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={e => e.preventDefault()}
+            >
+              <span>{index + 1}- {option}</span>
+              <span className="flex flex-col ml-2">
+                <button
+                  type="button"
+                  aria-label="Mover arriba"
+                  className={`text-gray-600 hover:text-green-700 p-1 disabled:opacity-30`}
+                  onClick={() => moveUp(index)}
+                  disabled={index === 0}
+                  tabIndex={0}
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  aria-label="Mover abajo"
+                  className={`text-gray-600 hover:text-green-700 p-1 disabled:opacity-30`}
+                  onClick={() => moveDown(index)}
+                  disabled={index === orderedOptions.length - 1}
+                  tabIndex={0}
+                >
+                  ▼
+                </button>
+              </span>
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }
