@@ -83,9 +83,10 @@ export async function POST(req) {
         case "percentages-sum-100":
           if (
             typeof userAnswer !== "object" ||
-            Object.keys(userAnswer).length !== question.options.length ||
             Object.values(userAnswer).reduce((sum, value) => sum + (parseFloat(value) || 0), 0) !== 100
           ) {
+            console.log(userAnswer);
+
             return new Response(
               JSON.stringify({question_id: question.id,error: `Respuesta inválida para la pregunta ${question.id}` }),
               { status: 400 }

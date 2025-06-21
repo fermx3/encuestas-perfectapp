@@ -31,10 +31,8 @@ const SurveyForm = () => {
         setAnswers({});
         setError(null);
         setErrorQuestionId(null);
-      } else if (res.status === 400) {
-        const errorData = await res.json();
-        setErrorQuestionId(errorData.question_id);
-        setError(errorData.error || "Respuesta inválida para una o más preguntas.");
+        window.scrollTo(0, 0);
+        window.location.reload(true);
       } else {
         const errorData = await res.json();
         if (errorData.question_id) {
