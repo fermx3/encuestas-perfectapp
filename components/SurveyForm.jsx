@@ -2,11 +2,36 @@
 import { useState, useEffect } from "react";
 import Question from "./Question";
 
-const SurveyForm = ({surveyId, preguntas}) => {
+const allowedNegocios = [
+  "TIENDA DE ABARROTES",
+  "RECAUDERIA",
+  "CREMERIA",
+  "MATERIAS PRIMAS",
+];
+
+const SurveyForm = ({ surveyId, preguntas }) => {
   const [answers, setAnswers] = useState({});
   const [errorQuestionId, setErrorQuestionId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false); // Loader state
+
+  // Obtener respuesta de la pregunta 107
+  const negocio = answers[107];
+
+  // Filtrar las secciones según la lógica
+  const visibleSections = preguntas.filter((section) => {
+    // Si es la sección 6, solo mostrar si negocio está en las opciones permitidas
+    if (section.id === 6) {
+      if (!negocio) return false; // Si no hay respuesta, no mostrar sección
+      return allowedNegocios.includes(negocio);
+    }
+    // Si es la sección 7, mostrar solo si negocio no está en las opciones permitidas
+    if (section.id === 7) {
+      if (!negocio) return false; // Si no hay respuesta, mostrar sección
+      return !allowedNegocios.includes(negocio);
+    }
+    return true; // Otras secciones siempre se muestran
+  });
 
   const handleChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -17,13 +42,24 @@ const SurveyForm = ({surveyId, preguntas}) => {
     e.preventDefault();
     setErrorQuestionId(null);
     setLoading(true); // Start loader
+
+    // Filtrar respuestas para incluir solo las preguntas visibles
+    const visibleQuestionIds = visibleSections.flatMap((section) =>
+      section.questions.map((q) => q.id)
+    );
+    const filteredAnswers = Object.fromEntries(
+      Object.entries(answers).filter(([id]) =>
+        visibleQuestionIds.includes(Number(id))
+      )
+    );
+
     try {
       const res = await fetch("/api/submit-survey", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ surveyId, answers }),
+        body: JSON.stringify({ surveyId, answers: filteredAnswers }),
       });
       if (res.ok) {
         alert("Gracias por tu respuesta!");
@@ -38,7 +74,9 @@ const SurveyForm = ({surveyId, preguntas}) => {
         if (errorData.question_id) {
           setErrorQuestionId(errorData.question_id);
         }
-        setError(errorData.error || "Ocurrió un error al enviar las respuestas.");
+        setError(
+          errorData.error || "Ocurrió un error al enviar las respuestas."
+        );
       }
     } finally {
       setLoading(false); // Stop loader
@@ -56,7 +94,7 @@ const SurveyForm = ({surveyId, preguntas}) => {
       onSubmit={handleSubmit}
       className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
     >
-      {preguntas.map((section) => (
+      {visibleSections.map((section) => (
         <div key={section.id} className="space-y-4 border-b pb-4">
           <h2 className="text-2xl font-semibold text-gray-800 mb-0">
             {section.title || "Sección sin título"}

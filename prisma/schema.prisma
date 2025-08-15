@@ -48,6 +48,7 @@ model Question {
   prefix       String?
   suffix       String?
   max          Int?
+  optionalIf   Json? // Condición para que la pregunta sea opcional
 }
 
 enum QuestionType {
