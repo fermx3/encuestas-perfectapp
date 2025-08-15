@@ -1,36 +1,77 @@
-'use client';
-import React from 'react';
+"use client";
+import { useState, useEffect, useRef } from "react";
 
-const Question = ({ question, value, onChange, hasError }) => {
-  const { id, question: text, type, options, placeholder, prefix, suffix, maxLength, max } = question;
+const Question = ({ question, questionNumber, value, onChange, hasError }) => {
+  // Destructure question properties
+  const {
+    id,
+    question: text,
+    questionType,
+    options,
+    placeholder,
+    prefix,
+    suffix,
+    maxLength,
+    max,
+  } = question;
+
+  // Convert options to an array if it's a string
+  const optionsArray = Array.isArray(options)
+    ? options
+    : options
+    ? options.split(";")
+    : [];
 
   // Display error as a warning if hasError is true
   const renderWarning = () =>
     hasError ? (
       <div className="text-yellow-600 bg-yellow-100 border-l-4 border-yellow-500 p-2 mb-2 rounded">
-        {typeof hasError === 'string' ? hasError : 'Por favor completa este campo correctamente.'}
+        {typeof hasError === "string"
+          ? hasError
+          : "Por favor completa este campo correctamente."}
       </div>
     ) : null;
 
-  if (type === 'multi-choice') {
+  if (questionType === "multi_choice") {
     return (
       <div>
-        <p className="text-lg font-semibold text-slate-800 mb-2">{text}</p>
+        <p className="text-lg font-semibold text-slate-800 mb-2">
+          {id} - {text}
+        </p>
         <div className="flex flex-wrap gap-2">
-          {options.map((opt, idx) => {
-            const isOther = opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other';
-            const checked = value?.some(v => (isOther ? typeof v === 'string' && v.startsWith('Otros:') : v === opt));
+          {optionsArray.map((opt, idx) => {
+            const isOther =
+              opt.toLowerCase() === "otros" ||
+              opt.toLowerCase() === "other" ||
+              opt.toLowerCase() === "otra" ||
+              opt.toLowerCase() === "otras" ||
+              opt.toLowerCase() === "other(s)" ||
+              opt.toLowerCase() === "otra(s)" ||
+              opt.toLowerCase() === "otro";
+            const checked = (Array.isArray(value) ? value : []).some((v) =>
+              isOther
+                ? typeof v === "string" && v.startsWith("Otros:")
+                : v === opt
+            );
             const otherValue = isOther
-              ? (value?.find(v => typeof v === 'string' && v.startsWith('Otros:')) || '').replace(/^Otros:\s*/, '')
-              : '';
+              ? (
+                  value?.find(
+                    (v) => typeof v === "string" && v.startsWith("Otros:")
+                  ) || ""
+                ).replace(/^Otros:\s*/, "")
+              : "";
 
             return (
               <label
                 key={idx}
                 className={`flex items-center px-4 py-2 rounded-full cursor-pointer border
-                  ${checked ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-700 border-gray-300 hover:bg-blue-50'}
+                  ${
+                    checked
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-white text-slate-700 border-gray-300 hover:bg-blue-50"
+                  }
                 `}
-                style={{ userSelect: 'none' }}
+                style={{ userSelect: "none" }}
               >
                 <input
                   type="checkbox"
@@ -41,17 +82,25 @@ const Question = ({ question, value, onChange, hasError }) => {
                     if (e.target.checked) {
                       if (isOther) {
                         // Add placeholder for Otros if not present
-                        if (!newValues.some(v => typeof v === 'string' && v.startsWith('Otros:'))) {
-                          newValues.push('Otros: ');
+                        if (
+                          !newValues.some(
+                            (v) =>
+                              typeof v === "string" && v.startsWith("Otros:")
+                          )
+                        ) {
+                          newValues.push("Otros: ");
                         }
                       } else {
                         newValues.push(opt);
                       }
                     } else {
                       if (isOther) {
-                        newValues = newValues.filter(v => !(typeof v === 'string' && v.startsWith('Otros:')));
+                        newValues = newValues.filter(
+                          (v) =>
+                            !(typeof v === "string" && v.startsWith("Otros:"))
+                        );
                       } else {
-                        newValues = newValues.filter(v => v !== opt);
+                        newValues = newValues.filter((v) => v !== opt);
                       }
                     }
                     onChange(id, newValues);
@@ -67,10 +116,12 @@ const Question = ({ question, value, onChange, hasError }) => {
                     placeholder="Especifica..."
                     value={otherValue}
                     required
-                    onChange={e => {
+                    onChange={(e) => {
                       const newOther = `Otros: ${e.target.value}`;
                       let newValues = value ? [...value] : [];
-                      const idx = newValues.findIndex(v => typeof v === 'string' && v.startsWith('Otros:'));
+                      const idx = newValues.findIndex(
+                        (v) => typeof v === "string" && v.startsWith("Otros:")
+                      );
                       if (idx !== -1) {
                         newValues[idx] = newOther;
                       } else {
@@ -86,18 +137,30 @@ const Question = ({ question, value, onChange, hasError }) => {
           {renderWarning()}
         </div>
         {/* Validation message for Otros */}
-        {options.some(opt => (opt.toLowerCase() === 'otros' || opt.toLowerCase() === 'other')) && value?.some(v => typeof v === 'string' && v.startsWith('Otros:')) && !value.find(v => typeof v === 'string' && v.match(/^Otros:\s*\S+/)) && (
-          <div className="text-red-500 text-sm mt-1">Por favor especifica el campo "Otros".</div>
-        )}
+        {optionsArray.some(
+          (opt) =>
+            opt.toLowerCase() === "otros" || opt.toLowerCase() === "other"
+        ) &&
+          value?.some((v) => typeof v === "string" && v.startsWith("Otros:")) &&
+          !value.find(
+            (v) => typeof v === "string" && v.match(/^Otros:\s*\S+/)
+          ) && (
+            <div className="text-red-500 text-sm mt-1">
+              Por favor especifica el campo "Otros".
+            </div>
+          )}
       </div>
     );
   }
 
-  if (type === 'single-choice') {
+  if (questionType === "single_choice") {
     return (
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-          {text}
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
         </label>
         <select
           id={`question-${id}`}
@@ -106,7 +169,7 @@ const Question = ({ question, value, onChange, hasError }) => {
           className="w-full p-2 border border-gray-300 rounded"
         >
           <option value="">Selecciona una opción</option>
-          {options.map((option, index) => (
+          {optionsArray.map((option, index) => (
             <option key={index} value={option}>
               {option}
             </option>
@@ -116,18 +179,21 @@ const Question = ({ question, value, onChange, hasError }) => {
       </div>
     );
   }
-  if (type === 'text') {
+  if (questionType === "text") {
     return (
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-          {text}
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
         </label>
         <input
           type="text"
           id={`question-${id}`}
-          placeholder={placeholder || 'Escribe tu respuesta aquí...'}
+          placeholder={placeholder || "Escribe tu respuesta aquí..."}
           maxLength={maxLength}
-          value={value}
+          value={value ?? ""}
           onChange={(e) => onChange(id, e.target.value)}
           className="w-full p-2 border border-gray-300 rounded"
         />
@@ -135,18 +201,43 @@ const Question = ({ question, value, onChange, hasError }) => {
       </div>
     );
   }
-  if (type === 'number') {
+  if (questionType === "text_box") {
     return (
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-          {text}
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
+        </label>
+        <textarea
+          id={`question-${id}`}
+          placeholder={placeholder || "Escribe tu respuesta aquí..."}
+          maxLength={maxLength || 500}
+          value={value ?? ""}
+          onChange={(e) => onChange(id, e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+          rows={4}
+        ></textarea>
+        {renderWarning()}
+      </div>
+    );
+  }
+  if (questionType === "number") {
+    return (
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
         </label>
         <div className="flex items-center">
           {prefix && <span className="text-gray-600 mr-2">{prefix}</span>}
           <input
             type="number"
             id={`question-${id}`}
-            value={value}
+            value={value ?? ""}
             min={0}
             max={max}
             onChange={(e) => onChange(id, e.target.value)}
@@ -159,12 +250,12 @@ const Question = ({ question, value, onChange, hasError }) => {
     );
   }
 
-  if (type === 'ordered-list') {
+  if (questionType === "ordered_list") {
     // Ordered list with drag-and-drop to reorder
-    const [orderedOptions, setOrderedOptions] = React.useState(value || options);
+    const [orderedOptions, setOrderedOptions] = useState(value || optionsArray);
 
     // Update parent when order changes
-    React.useEffect(() => {
+    useEffect(() => {
       if (JSON.stringify(orderedOptions) !== JSON.stringify(value)) {
         onChange(id, orderedOptions);
       }
@@ -172,8 +263,8 @@ const Question = ({ question, value, onChange, hasError }) => {
     }, [orderedOptions]);
 
     // Drag and drop handlers
-    const dragItem = React.useRef();
-    const dragOverItem = React.useRef();
+    const dragItem = useRef();
+    const dragOverItem = useRef();
 
     const handleDragStart = (index) => {
       dragItem.current = index;
@@ -196,30 +287,39 @@ const Question = ({ question, value, onChange, hasError }) => {
     const moveUp = (index) => {
       if (index === 0) return;
       const newList = [...orderedOptions];
-      [newList[index - 1], newList[index]] = [newList[index], newList[index - 1]];
+      [newList[index - 1], newList[index]] = [
+        newList[index],
+        newList[index - 1],
+      ];
       setOrderedOptions(newList);
     };
 
     const moveDown = (index) => {
       if (index === orderedOptions.length - 1) return;
       const newList = [...orderedOptions];
-      [newList[index], newList[index + 1]] = [newList[index + 1], newList[index]];
+      [newList[index], newList[index + 1]] = [
+        newList[index + 1],
+        newList[index],
+      ];
       setOrderedOptions(newList);
     };
 
     const green_gradient_colors = [
-      'from-green-500 to-green-600',
-      'from-green-400 to-green-500',
-      'from-green-300 to-green-400',
-      'from-green-200 to-green-300',
-      'from-green-100 to-green-200',
-      'from-green-50 to-green-100',
+      "from-green-500 to-green-600",
+      "from-green-400 to-green-500",
+      "from-green-300 to-green-400",
+      "from-green-200 to-green-300",
+      "from-green-100 to-green-200",
+      "from-green-50 to-green-100",
     ];
 
     return (
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-          {text}
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
         </label>
         <ul>
           {orderedOptions.map((option, index) => (
@@ -230,9 +330,11 @@ const Question = ({ question, value, onChange, hasError }) => {
               onDragStart={() => handleDragStart(index)}
               onDragEnter={() => handleDragEnter(index)}
               onDragEnd={handleDragEnd}
-              onDragOver={e => e.preventDefault()}
+              onDragOver={(e) => e.preventDefault()}
             >
-              <span>{index + 1}- {option}</span>
+              <span>
+                {index + 1}- {option}
+              </span>
               <span className="flex flex-col ml-2">
                 <button
                   type="button"
@@ -263,18 +365,24 @@ const Question = ({ question, value, onChange, hasError }) => {
     );
   }
 
-  if (type === 'percentages-sum-100') {
+  if (questionType === "percentages_sum_100") {
     // Calcula la suma actual de los valores ingresados
-    const total = options.reduce((sum, option) => sum + (parseInt(value?.[option]) || 0), 0);
+    const total = optionsArray.reduce(
+      (sum, option) => sum + (parseInt(value?.[option]) || 0),
+      0
+    );
     const isComplete = total === 100;
 
     return (
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2" htmlFor={`question-${id}`}>
-          {text}
+        <label
+          className="block text-gray-700 font-bold mb-2"
+          htmlFor={`question-${id}`}
+        >
+          {id} - {text}
         </label>
         <div className="flex flex-wrap space-x-2">
-          {options.map((option, index) => (
+          {optionsArray.map((option, index) => (
             <div key={index} className="flex-1">
               <label className="block text-gray-600 mb-1">{option}</label>
               <input
@@ -282,11 +390,16 @@ const Question = ({ question, value, onChange, hasError }) => {
                 min={0}
                 max={100}
                 placeholder={0}
-                value={value?.[option] || ''}
+                value={value?.[option] || ""}
                 onChange={(e) => {
                   const inputVal = parseInt(e.target.value) || 0;
                   const newValue = { ...value, [option]: inputVal };
-                  const newTotal = options.reduce((sum, opt) => sum + (opt === option ? inputVal : (parseInt(value?.[opt]) || 0)), 0);
+                  const newTotal = optionsArray.reduce(
+                    (sum, opt) =>
+                      sum +
+                      (opt === option ? inputVal : parseInt(value?.[opt]) || 0),
+                    0
+                  );
                   if (newTotal <= 100) {
                     onChange(id, newValue);
                   }
@@ -297,15 +410,27 @@ const Question = ({ question, value, onChange, hasError }) => {
           ))}
         </div>
         <div className="mt-2 text-sm">
-          Suma total: <span className={isComplete ? "text-green-600" : "text-red-600"}>{total}</span> / 100
-          {!isComplete && <span className="ml-2 text-red-500">La suma debe ser exactamente 100%</span>}
+          Suma total:{" "}
+          <span className={isComplete ? "text-green-600" : "text-red-600"}>
+            {total}
+          </span>{" "}
+          / 100
+          {!isComplete && (
+            <span className="ml-2 text-red-500">
+              La suma debe ser exactamente 100%
+            </span>
+          )}
         </div>
         {renderWarning()}
       </div>
     );
   }
 
-  return <p className='text-red-500'>Tipo de pregunta no soportado: {type}</p>;
-}
+  return (
+    <p className="text-red-500">
+      Tipo de pregunta no soportado: {questionType}
+    </p>
+  );
+};
 
 export default Question;

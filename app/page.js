@@ -1,9 +1,19 @@
+import { getAllEncuestas } from "@/lib/encuestas";
 import Image from "next/image";
 import Link from "next/link";
 
-const Home = () => {
+const Home = async () => {
+  // Fetch the list of surveys from the API
+  const encuestas = await getAllEncuestas();
+
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen" style={{ background: "linear-gradient(to bottom right, #1e3a8a, #60a5fa, #bfdbfe)" }}>
+    <main
+      className="flex flex-col items-center justify-center min-h-screen"
+      style={{
+        background:
+          "linear-gradient(to bottom right, #1e3a8a, #60a5fa, #bfdbfe)",
+      }}
+    >
       <div className="w-full max-w-lg p-8 bg-white shadow-lg rounded-xl border border-yellow-300">
         <div className="flex justify-center mb-6">
           <Image
@@ -23,13 +33,19 @@ const Home = () => {
       </div>
       <div className="w-full max-w-lg mt-8 p-6 bg-white shadow-md rounded-lg border border-blue-200">
         <ul className="space-y-3">
-            <Link href="/encuesta" className="text-blue-800 font-semibold">
-          <li className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition">
-              Evaluación de Queso Imitación
-          </li>
+          {encuestas.map((encuesta) => (
+            <Link
+              key={encuesta.id}
+              href={`/encuestas/${encuesta.id}`}
+              className="text-blue-800 font-semibold"
+            >
+              <li className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition">
+                {encuesta.id} - {encuesta.title || "Encuesta sin título"}
+              </li>
             </Link>
+          ))}
         </ul>
-        </div>
+      </div>
     </main>
   );
 };

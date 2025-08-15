@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,7 +8,54 @@ datasource db {
 }
 
 model Response {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  answers Json
+  id         Int      @id @default(autoincrement())
+  encuestaId Int
+  encuesta   Encuesta @relation(fields: [encuestaId], references: [id]) // Many-to-one: Muchas respuestas pertenecen a una encuesta
+  createdAt  DateTime @default(now())
+  answers    Json
+}
+
+model Encuesta {
+  id        Int        @id @default(autoincrement())
+  title     String
+  createdAt DateTime   @default(now())
+  sections  Section[]  // One-to-many: Una encuesta tiene muchas secciones
+  questions Question[] // One-to-many: Una encuesta tiene muchas preguntas
+  responses Response[] // One-to-many: Una encuesta tiene muchas respuestas
+}
+
+model Section {
+  id          Int        @id @default(autoincrement())
+  encuestaId  Int
+  encuesta    Encuesta   @relation(fields: [encuestaId], references: [id]) // Many-to-one: Muchas secciones pertenecen a una encuesta
+  title       String
+  description String?
+  questions   Question[] // One-to-many: Una sección tiene muchas preguntas
+}
+
+model Question {
+  id           Int          @id @default(autoincrement())
+  encuestaId   Int
+  encuesta     Encuesta     @relation(fields: [encuestaId], references: [id]) // Many-to-one: Muchas preguntas pertenecen a una encuesta
+  sectionId    Int
+  section      Section      @relation(fields: [sectionId], references: [id])   // Many-to-one: Muchas preguntas pertenecen a una sección
+  question     String
+  questionType QuestionType
+  options      String?
+  placeholder  String?
+  maxLength    Int?
+  count        Int?
+  prefix       String?
+  suffix       String?
+  max          Int?
+}
+
+enum QuestionType {
+  text
+  single_choice
+  multi_choice
+  percentages_sum_100
+  ordered_list
+  number
+  text_box
 }

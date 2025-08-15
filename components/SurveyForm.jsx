@@ -1,9 +1,8 @@
 "use client";
-import React, { useState } from "react";
-import { survey_questions } from "@/lib/preguntas";
+import { useState, useEffect } from "react";
 import Question from "./Question";
 
-const SurveyForm = () => {
+const SurveyForm = ({surveyId, preguntas}) => {
   const [answers, setAnswers] = useState({});
   const [errorQuestionId, setErrorQuestionId] = useState(null);
   const [error, setError] = useState(null);
@@ -24,7 +23,7 @@ const SurveyForm = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(answers),
+        body: JSON.stringify({ surveyId, answers }),
       });
       if (res.ok) {
         alert("Gracias por tu respuesta!");
@@ -33,6 +32,7 @@ const SurveyForm = () => {
         setErrorQuestionId(null);
         window.scrollTo(0, 0);
         window.location.reload(true);
+        console.log("Encuesta enviada con éxito", answers);
       } else {
         const errorData = await res.json();
         if (errorData.question_id) {
@@ -45,12 +45,21 @@ const SurveyForm = () => {
     }
   };
 
+  const [showError, setShowError] = useState(true);
+
+  useEffect(() => {
+    if (error) setShowError(true);
+  }, [error]);
+
+  console.log(preguntas);
+
+
   return (
     <form
       onSubmit={handleSubmit}
       className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
     >
-      {survey_questions.map((section) => (
+      {preguntas.map((section, idx) => (
         <div key={section.id} className="space-y-4 border-b pb-4">
           <h2 className="text-2xl font-semibold text-gray-800">
             {section.section}
@@ -59,6 +68,7 @@ const SurveyForm = () => {
             <Question
               key={q.id}
               question={q}
+              questionNumber={idx + 1}
               value={answers[q.id]}
               onChange={handleChange}
               hasError={errorQuestionId === q.id}
@@ -81,9 +91,17 @@ const SurveyForm = () => {
           <span className="ml-2 text-blue-600">Enviando respuestas...</span>
         </div>
       )}
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded">
-          {error}
+      {error && showError && (
+        <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded shadow fixed bottom-4 left-1/2 transform -translate-x-1/2 w-96 flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            type="button"
+            className="ml-4 text-red-500 hover:text-red-700 font-bold text-xl"
+            onClick={() => setShowError(false)}
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
         </div>
       )}
     </form>
