@@ -51,20 +51,19 @@ const SurveyForm = ({surveyId, preguntas}) => {
     if (error) setShowError(true);
   }, [error]);
 
-  console.log(preguntas);
-
-
   return (
     <form
       onSubmit={handleSubmit}
       className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
     >
-      {preguntas.map((section, idx) => (
+      {preguntas.map((section) => (
+        console.log("Section: ", section),
         <div key={section.id} className="space-y-4 border-b pb-4">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {section.section}
+          <h2 className="text-2xl font-semibold text-gray-800 mb-0">
+            {section.title || "Sección sin título"}
           </h2>
-          {section.questions.map((q) => (
+          <p className="text-gray-600 text-sm mb-8">{section.description}</p>
+          {section.questions.map((q, idx) => (
             <Question
               key={q.id}
               question={q}

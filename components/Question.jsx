@@ -36,7 +36,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
     return (
       <div>
         <p className="text-lg font-semibold text-slate-800 mb-2">
-          {id} - {text}
+          {questionNumber} - {text}
         </p>
         <div className="flex flex-wrap gap-2">
           {optionsArray.map((opt, idx) => {
@@ -160,7 +160,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <select
           id={`question-${id}`}
@@ -186,7 +186,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <input
           type="text"
@@ -208,7 +208,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <textarea
           id={`question-${id}`}
@@ -230,7 +230,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <div className="flex items-center">
           {prefix && <span className="text-gray-600 mr-2">{prefix}</span>}
@@ -319,7 +319,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <ul>
           {orderedOptions.map((option, index) => (
@@ -379,7 +379,7 @@ const Question = ({ question, questionNumber, value, onChange, hasError }) => {
           className="block text-gray-700 font-bold mb-2"
           htmlFor={`question-${id}`}
         >
-          {id} - {text}
+          {questionNumber} - {text}
         </label>
         <div className="flex flex-wrap space-x-2">
           {optionsArray.map((option, index) => (
