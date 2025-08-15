@@ -4,7 +4,8 @@ import { getSurveyById } from "@/lib/preguntas";
 export async function POST(req) {
   try {
     const {surveyId, answers} = await req.json();
-    console.log("Received answers: %o", answers);
+    console.log("Received surveyId:", surveyId);
+    console.log("Received answers:", answers);
 
     // Basic validation
 
@@ -82,12 +83,16 @@ export async function POST(req) {
           validAnswers[question.id] = userAnswer;
           break;
         case "text_box":
+          console.log("Validating text_box question", question.id, typeof userAnswer);
+
           if (typeof userAnswer !== "string" || userAnswer.trim() === "") {
             return new Response(
               JSON.stringify({question_id: question.id, error: `Respuesta inválida para la pregunta ${question.id}` }),
               { status: 400 }
             );
           }
+          validAnswers[question.id] = userAnswer;
+          break;
         case "number":
           // Check if userAnswer is a valid number
           if (typeof parseInt(userAnswer) !== "number" || isNaN(parseInt(userAnswer))) {

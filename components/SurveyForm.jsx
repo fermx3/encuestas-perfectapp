@@ -57,7 +57,6 @@ const SurveyForm = ({surveyId, preguntas}) => {
       className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
     >
       {preguntas.map((section) => (
-        console.log("Section: ", section),
         <div key={section.id} className="space-y-4 border-b pb-4">
           <h2 className="text-2xl font-semibold text-gray-800 mb-0">
             {section.title || "Sección sin título"}

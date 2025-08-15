@@ -32,12 +32,12 @@ const Home = async () => {
         </p>
       </div>
       <div className="w-full max-w-lg mt-8 p-6 bg-white shadow-md rounded-lg border border-blue-200">
-        <ul className="space-y-3">
+        <ul className="space-y-4 flex flex-col">
           {encuestas.map((encuesta) => (
             <Link
               key={encuesta.id}
               href={`/encuestas/${encuesta.id}`}
-              className="text-blue-800 font-semibold"
+              className="text-blue-800 font-semibold shadow-md hover:shadow-lg rounded-lg"
             >
               <li className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition">
                 {encuesta.id} - {encuesta.title || "Encuesta sin título"}
