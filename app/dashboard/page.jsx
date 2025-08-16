@@ -1,31 +1,4 @@
-import { prisma } from "@/lib/prisma";
-
-const getDashboardData = async () => {
-  const encuestas = await prisma.encuesta.findMany({
-    include: {
-      _count: {
-        select: { responses: true, questions: true, sections: true },
-      },
-      responses: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
-        select: { createdAt: true },
-      },
-    },
-    orderBy: { id: "asc" },
-  });
-
-  return encuestas.map((e) => ({
-    id: e.id,
-    title: e.title,
-    respuestas: e._count.responses,
-    preguntas: e._count.questions,
-    secciones: e._count.sections,
-    ultimaRespuesta: e.responses[0]?.createdAt
-      ? new Date(e.responses[0].createdAt).toLocaleString()
-      : "Sin respuestas",
-  }));
-};
+import { getDashboardData } from "@/lib/encuestas";
 
 export default async function DashboardPage() {
   const encuestas = await getDashboardData();
