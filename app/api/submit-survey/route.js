@@ -40,9 +40,12 @@ export async function POST(req) {
 
     const survey_questions = await getSurveyById(surveyId);
 
-    for (const question of survey_questions.flatMap(
+    const allQuestions = survey_questions.flatMap(
       (section) => section.questions
-    )) {
+    );
+
+    for (let idx = 0; idx < allQuestions.length; idx++) {
+      const question = allQuestions[idx];
       const userAnswer = answers[question.id];
 
       // --- VALIDACIÓN OPCIONAL CON optionalIf ---
@@ -61,7 +64,7 @@ export async function POST(req) {
         return new Response(
           JSON.stringify({
             question_id: question.id,
-            error: `Respuesta faltante para la pregunta ${question.id}`,
+            error: `Respuesta faltante. (ID: ${question.id})`,
           }),
           { status: 400 }
         );
@@ -71,7 +74,7 @@ export async function POST(req) {
         return new Response(
           JSON.stringify({
             question_id: question.id,
-            error: `Respuesta faltante para la pregunta ${question.id}`,
+            error: `Respuesta faltante. (ID: ${question.id})`,
           }),
           { status: 400 }
         );
@@ -83,7 +86,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -95,7 +98,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -107,7 +110,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -115,17 +118,11 @@ export async function POST(req) {
           validAnswers[question.id] = userAnswer;
           break;
         case "text_box":
-          console.log(
-            "Validating text_box question",
-            question.id,
-            typeof userAnswer
-          );
-
           if (typeof userAnswer !== "string" || userAnswer.trim() === "") {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -141,7 +138,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -153,7 +150,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -173,7 +170,7 @@ export async function POST(req) {
             return new Response(
               JSON.stringify({
                 question_id: question.id,
-                error: `Respuesta inválida para la pregunta ${question.id}`,
+                error: `Respuesta inválida. (ID: ${question.id})`,
               }),
               { status: 400 }
             );
@@ -184,7 +181,7 @@ export async function POST(req) {
           return new Response(
             JSON.stringify({
               question_id: question.id,
-              error: `Tipo de pregunta desconocido para pregunta ${question.id}`,
+              error: `Tipo de pregunta desconocido. (ID: ${question.id})`,
             }),
             { status: 400 }
           );

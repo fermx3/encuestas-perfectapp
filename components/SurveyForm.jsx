@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Question from "./Question";
 
 const allowedNegocios = [
@@ -14,6 +14,7 @@ const SurveyForm = ({ surveyId, preguntas }) => {
   const [errorQuestionId, setErrorQuestionId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false); // Loader state
+  const questionRefs = useRef({});
 
   // Obtener respuesta de la pregunta 107
   const negocio = answers[107];
@@ -36,7 +37,11 @@ const SurveyForm = ({ surveyId, preguntas }) => {
   const handleChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
     if (errorQuestionId === id) setErrorQuestionId(null);
+    setError(null);
   };
+
+  // Calcular el número de pregunta global
+  let surveyQuestionNumber = 1;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,7 +73,6 @@ const SurveyForm = ({ surveyId, preguntas }) => {
         setErrorQuestionId(null);
         window.scrollTo(0, 0);
         window.location.reload(true);
-        console.log("Encuesta enviada con éxito", answers);
       } else {
         const errorData = await res.json();
         if (errorData.question_id) {
@@ -100,16 +104,21 @@ const SurveyForm = ({ surveyId, preguntas }) => {
             {section.title || "Sección sin título"}
           </h2>
           <p className="text-gray-600 text-sm mb-8">{section.description}</p>
-          {section.questions.map((q, idx) => (
-            <Question
-              key={q.id}
-              question={q}
-              questionNumber={idx + 1}
-              value={answers[q.id]}
-              onChange={handleChange}
-              hasError={errorQuestionId === q.id}
-            />
-          ))}
+          {section.questions.map((q) => {
+            const questionNumber = surveyQuestionNumber;
+            surveyQuestionNumber += 1;
+            return (
+              <Question
+                key={q.id}
+                question={q}
+                questionNumber={questionNumber}
+                value={answers[q.id]}
+                onChange={handleChange}
+                hasError={errorQuestionId === q.id}
+                ref={(el) => (questionRefs.current[q.id] = el)}
+              />
+            );
+          })}
         </div>
       ))}
       <div className="flex justify-center">
@@ -130,6 +139,20 @@ const SurveyForm = ({ surveyId, preguntas }) => {
       {error && showError && (
         <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded shadow fixed bottom-4 left-1/2 transform -translate-x-1/2 w-96 flex items-center justify-between">
           <span>{error}</span>
+          <button
+            type="button"
+            className="text-blue-500 hover:text-blue-700 font-bold"
+            onClick={() => {if (errorQuestionId && questionRefs.current[errorQuestionId]) {
+                questionRefs.current[errorQuestionId].scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }
+            }}
+            aria-label="Cerrar"
+          >
+            Ir a la pregunta
+          </button>
           <button
             type="button"
             className="ml-4 text-red-500 hover:text-red-700 font-bold text-xl"
