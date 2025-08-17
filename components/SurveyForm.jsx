@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Question from "./Question";
+import ProgressBar from "./ui/progress-bar";
 
 const allowedNegocios = [
   "TIENDA DE ABARROTES",
@@ -93,77 +94,84 @@ const SurveyForm = ({ surveyId, preguntas }) => {
     if (error) setShowError(true);
   }, [error]);
 
+  const totalQuestions = visibleSections.flatMap((s) => s.questions).length;
+  const answeredQuestions = Object.keys(answers).length;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
-    >
-      {visibleSections.map((section) => (
-        <div key={section.id} className="space-y-4 border-b pb-4">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-0">
-            {section.title || "Sección sin título"}
-          </h2>
-          <p className="text-gray-600 text-sm mb-8">{section.description}</p>
-          {section.questions.map((q) => {
-            const questionNumber = surveyQuestionNumber;
-            surveyQuestionNumber += 1;
-            return (
-              <Question
-                key={q.id}
-                question={q}
-                questionNumber={questionNumber}
-                value={answers[q.id]}
-                onChange={handleChange}
-                hasError={errorQuestionId === q.id}
-                ref={(el) => (questionRefs.current[q.id] = el)}
-              />
-            );
-          })}
-        </div>
-      ))}
-      <div className="flex justify-center">
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-full transition duration-200"
-          disabled={loading}
-        >
-          {loading ? "Enviando..." : "Enviar respuestas"}
-        </button>
-      </div>
-      {loading && (
-        <div className="flex justify-center mt-4">
-          <span className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></span>
-          <span className="ml-2 text-blue-600">Enviando respuestas...</span>
-        </div>
-      )}
-      {error && showError && (
-        <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded shadow fixed bottom-4 left-1/2 transform -translate-x-1/2 w-96 flex items-center justify-between">
-          <span>{error}</span>
+    <>
+    <ProgressBar total={totalQuestions} answered={answeredQuestions} />
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl space-y-6"
+      >
+        {visibleSections.map((section) => (
+          <div key={section.id} className="space-y-4 border-b pb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-0">
+              {section.title || "Sección sin título"}
+            </h2>
+            <p className="text-gray-600 text-sm mb-8">{section.description}</p>
+            {section.questions.map((q) => {
+              const questionNumber = surveyQuestionNumber;
+              surveyQuestionNumber += 1;
+              return (
+                <Question
+                  key={q.id}
+                  question={q}
+                  questionNumber={questionNumber}
+                  value={answers[q.id]}
+                  onChange={handleChange}
+                  hasError={errorQuestionId === q.id}
+                  ref={(el) => (questionRefs.current[q.id] = el)}
+                />
+              );
+            })}
+          </div>
+        ))}
+        <div className="flex justify-center">
           <button
-            type="button"
-            className="text-blue-500 hover:text-blue-700 font-bold"
-            onClick={() => {if (errorQuestionId && questionRefs.current[errorQuestionId]) {
-                questionRefs.current[errorQuestionId].scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-              }
-            }}
-            aria-label="Cerrar"
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-full transition duration-200"
+            disabled={loading}
           >
-            Ir a la pregunta
-          </button>
-          <button
-            type="button"
-            className="ml-4 text-red-500 hover:text-red-700 font-bold text-xl"
-            onClick={() => setShowError(false)}
-            aria-label="Cerrar"
-          >
-            ×
+            {loading ? "Enviando..." : "Enviar respuestas"}
           </button>
         </div>
-      )}
-    </form>
+        {loading && (
+          <div className="flex justify-center mt-4">
+            <span className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></span>
+            <span className="ml-2 text-blue-600">Enviando respuestas...</span>
+          </div>
+        )}
+        {error && showError && (
+          <div className="mt-4 p-4 bg-red-100 text-red-800 border border-red-300 rounded shadow fixed bottom-4 left-1/2 transform -translate-x-1/2 w-96 flex items-center justify-between">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="text-blue-500 hover:text-blue-700 font-bold"
+              onClick={() => {
+                if (errorQuestionId && questionRefs.current[errorQuestionId]) {
+                  questionRefs.current[errorQuestionId].scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }}
+              aria-label="Cerrar"
+            >
+              Ir a la pregunta
+            </button>
+            <button
+              type="button"
+              className="ml-4 text-red-500 hover:text-red-700 font-bold text-xl"
+              onClick={() => setShowError(false)}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+          </div>
+        )}
+      </form>
+    </>
   );
 };
 
