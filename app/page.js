@@ -8,7 +8,7 @@ const Home = async () => {
 
   return (
     <main
-      className="flex flex-col items-center justify-center min-h-screen"
+      className="flex flex-col items-center justify-center min-h-screen p-4"
       style={{
         background:
           "linear-gradient(to bottom right, #1e3a8a, #60a5fa, #bfdbfe)",
