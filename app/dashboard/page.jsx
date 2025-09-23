@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getDashboardData } from "@/lib/encuestas";
 
 export default async function DashboardPage() {
